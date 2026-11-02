@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aegisops-remediation-policy
+  namespace: unimind-aegisops
+data:
+  policy.json: |
+    {
+      "human_approval_required": true,
+      "allowed_actions": ["RESTART_POD", "SCALE_DEPLOYMENT", "ROLLBACK_DEPLOYMENT"],
+      "max_replicas_limit": 8,
+      "audit_logging": true,
+      "unrestricted_shell_allowed": false
+    }

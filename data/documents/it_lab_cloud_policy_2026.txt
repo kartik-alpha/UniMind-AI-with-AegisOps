@@ -1,0 +1,4 @@
+IT INFRASTRUCTURE & LAB POLICIES 2026
+Computing laboratories and AI research clusters are open 24/7 for authenticated engineering students.
+VPN and cloud sandbox credentials are provisioned through university SSO and reset every 90 days.
+Unauthorized network sniffing, port scanning, or cryptocurrency mining on university compute nodes is strictly prohibited and results in immediate account suspension.

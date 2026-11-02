@@ -1,0 +1,5 @@
+EXAMINATION GRADING SYSTEM 2026
+The university utilizes a 10-point cumulative grade point average (CGPA) system based on relative grading:
+A+ = 10.0 (Outstanding), A = 9.0 (Excellent), B+ = 8.0 (Very Good), B = 7.0 (Good), C = 6.0 (Average), D = 5.0 (Pass), F = 0.0 (Fail).
+A minimum cumulative CGPA of 5.0 is required for undergraduate degree conferral.
+Grade dispute appeals must be formally lodged through the Examination Portal within 10 days of results publication.

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: unimind-postgres
+    environment:
+      POSTGRES_DB: unimind_db
+      POSTGRES_USER: unimind_user
+      POSTGRES_PASSWORD: unimind_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: unimind-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./unimind.db
+      - SECRET_KEY=unimind-super-secret-key-change-in-production-2026
+    depends_on:
+      - postgres
+
+  lms:
+    build:
+      context: .
+      dockerfile: services/lms/Dockerfile
+    container_name: unimind-lms
+    ports:
+      - "8001:8001"
+
+  student-portal:
+    build:
+      context: .
+      dockerfile: services/student_portal/Dockerfile
+    container_name: unimind-student-portal
+    ports:
+      - "8002:8002"
+
+  exam-service:
+    build:
+      context: .
+      dockerfile: services/exam_service/Dockerfile
+    container_name: unimind-exam-service
+    ports:
+      - "8003:8003"
+
+  library-service:
+    build:
+      context: .
+      dockerfile: services/library_service/Dockerfile
+    container_name: unimind-library-service
+    ports:
+      - "8004:8004"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: unimind-prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: unimind-loki
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml
+    ports:
+      - "3100:3100"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: unimind-grafana
+    ports:
+      - "3001:3000"
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: unimind-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
