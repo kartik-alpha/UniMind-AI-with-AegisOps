@@ -35,3 +35,33 @@ htmlcov/
 # Temporary files
 *.tmp
 *.bak
+# Secrets
+.env
+.env.*
+!.env.example
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Databases and generated vector stores
+*.db
+*.sqlite
+*.sqlite3
+chroma_db/
+**/chroma_db/
+# Frontend
+node_modules/
+dist/
+build/
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+# IDE
+.vscode/
+.idea/
+# OS
+.DS_Store
+Thumbs.db
