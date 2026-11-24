@@ -8,6 +8,9 @@ from app.api.v1.agent import router as agent_router
 from app.api.v1.tickets import router as tickets_router
 from app.api.v1.ml import router as ml_router
 from app.api.v1.aegisops import router as aegisops_router
+from app.api.v1.digital_twin import router as digital_twin_router
+from app.api.v1.platform import router as platform_router
+from app.api.v1.governance import router as governance_router
 
 api_router = APIRouter()
 
@@ -20,3 +23,6 @@ api_router.include_router(agent_router)
 api_router.include_router(tickets_router)
 api_router.include_router(ml_router)
 api_router.include_router(aegisops_router)
+api_router.include_router(digital_twin_router)
+api_router.include_router(platform_router)
+api_router.include_router(governance_router)

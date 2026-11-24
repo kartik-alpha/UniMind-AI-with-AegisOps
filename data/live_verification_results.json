@@ -1,0 +1,22 @@
+{
+  "phase1_health": true,
+  "phase1_api_health": true,
+  "admin_login": true,
+  "student_login": true,
+  "student_upload_blocked": true,
+  "admin_upload_pdf": true,
+  "rag_ingestion": true,
+  "rag_grounded_search": true,
+  "assistant_grounded_answer": true,
+  "assistant_refusal_nonhallucination": true,
+  "services_inspection": true,
+  "chaos_injection": true,
+  "telemetry_reflection": true,
+  "incident_deduplication": true,
+  "ai_diagnosis_runbook": true,
+  "student_remediation_blocked": true,
+  "remediation_rejection": true,
+  "chaos_restore": true,
+  "remediation_approval_resolved": true,
+  "db_incident_resolved": true
+}

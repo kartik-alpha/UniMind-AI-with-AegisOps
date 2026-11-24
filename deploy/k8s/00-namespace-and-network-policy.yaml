@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: unimind-aegisops
+  labels:
+    environment: production
+    app.kubernetes.io/name: unimind-aegisops
+    app.kubernetes.io/part-of: unimind-platform
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: unimind-aegisops
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-internal
+  namespace: unimind-aegisops
+spec:
+  podSelector:
+    matchLabels:
+      app: unimind-backend
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: unimind-frontend
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8000
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-ingress
+  namespace: unimind-aegisops
+spec:
+  podSelector:
+    matchLabels:
+      app: unimind-frontend
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 80
+  policyTypes:
+    - Ingress

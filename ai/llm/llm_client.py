@@ -42,10 +42,159 @@ def calculate_groundedness_score(query: str, context_chunks: List[Dict[str, Any]
         return 0.0
 
     token_overlap_ratio = len(matched_tokens) / len(tokens)
+
+    # Substantive coverage threshold: If query has multiple terms and less than 35% match, consider ungrounded
+    if len(tokens) >= 3 and token_overlap_ratio < 0.35:
+        return 0.0
+
     max_sim = max((c.get("similarity_score", 0.0) for c in context_chunks), default=0.0)
 
     groundedness = (token_overlap_ratio * 0.6) + (float(max_sim) * 0.4)
     return round(min(1.0, max(0.0, groundedness)), 2)
+
+
+def _format_context_blocks(context_chunks: List[Dict[str, Any]]) -> str:
+    context_blocks = []
+    for idx, chunk in enumerate(context_chunks, 1):
+        meta = chunk.get("metadata", {})
+        title = meta.get("title", "Document")
+        category = meta.get("category", "General")
+        heading = meta.get("section_heading", "")
+        heading_str = f" - Section: {heading}" if heading else ""
+        text = chunk.get("text", "")
+        context_blocks.append(f"[Source {idx}: {title} ({category}){heading_str}]\n{text}")
+    return "\n\n".join(context_blocks)
+
+
+def _call_openai(
+    query: str,
+    context_str: str,
+    conversation_history: Optional[List[Dict[str, str]]],
+    sources: List[Dict[str, Any]],
+    groundedness: float,
+) -> Optional[Dict[str, Any]]:
+    api_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY", "")
+    if not api_key or api_key.startswith("sk-placeholder"):
+        return None
+    try:
+        import httpx
+        sys_prompt = SYSTEM_PROMPT_TEMPLATE
+        user_prompt = USER_PROMPT_TEMPLATE.format(context=context_str, query=query)
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        messages = [{"role": "system", "content": sys_prompt}]
+        if conversation_history:
+            for msg in conversation_history[-6:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": user_prompt})
+
+        payload = {
+            "model": settings.LLM_MODEL,
+            "messages": messages,
+            "temperature": 0.1,
+        }
+        resp = httpx.post("https://api.openai.com/v1/chat/completions", json=payload, headers=headers, timeout=15.0)
+        if resp.status_code == 200:
+            answer = resp.json()["choices"][0]["message"]["content"]
+            return {
+                "answer": answer,
+                "sources": sources,
+                "grounded": True,
+                "groundedness_score": groundedness,
+                "provider": "openai",
+            }
+    except Exception:
+        pass
+    return None
+
+
+def _call_ollama(
+    query: str,
+    context_str: str,
+    conversation_history: Optional[List[Dict[str, str]]],
+    sources: List[Dict[str, Any]],
+    groundedness: float,
+) -> Optional[Dict[str, Any]]:
+    try:
+        import httpx
+        base_url = getattr(settings, "OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+        sys_prompt = SYSTEM_PROMPT_TEMPLATE
+        user_prompt = USER_PROMPT_TEMPLATE.format(context=context_str, query=query)
+        messages = [{"role": "system", "content": sys_prompt}]
+        if conversation_history:
+            for msg in conversation_history[-6:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": user_prompt})
+
+        payload = {
+            "model": getattr(settings, "LLM_MODEL", "llama3.2") or "llama3.2",
+            "messages": messages,
+            "stream": False,
+            "options": {"temperature": 0.1},
+        }
+        resp = httpx.post(f"{base_url}/api/chat", json=payload, timeout=5.0)
+        if resp.status_code == 200:
+            answer = resp.json().get("message", {}).get("content", "")
+            if answer:
+                return {
+                    "answer": answer,
+                    "sources": sources,
+                    "grounded": True,
+                    "groundedness_score": groundedness,
+                    "provider": "ollama",
+                }
+    except Exception:
+        pass
+    return None
+
+
+def _call_claude(
+    query: str,
+    context_str: str,
+    conversation_history: Optional[List[Dict[str, str]]],
+    sources: List[Dict[str, Any]],
+    groundedness: float,
+) -> Optional[Dict[str, Any]]:
+    api_key = getattr(settings, "ANTHROPIC_API_KEY", "") or os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        import httpx
+        sys_prompt = SYSTEM_PROMPT_TEMPLATE
+        user_prompt = USER_PROMPT_TEMPLATE.format(context=context_str, query=query)
+        headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
+        messages = []
+        if conversation_history:
+            for msg in conversation_history[-6:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": user_prompt})
+
+        payload = {
+            "model": "claude-3-5-sonnet-20241022",
+            "system": sys_prompt,
+            "messages": messages,
+            "max_tokens": 1024,
+            "temperature": 0.1,
+        }
+        resp = httpx.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers, timeout=15.0)
+        if resp.status_code == 200:
+            data = resp.json()
+            content_blocks = data.get("content", [])
+            answer = "".join(b.get("text", "") for b in content_blocks if b.get("type") == "text")
+            if answer:
+                return {
+                    "answer": answer,
+                    "sources": sources,
+                    "grounded": True,
+                    "groundedness_score": groundedness,
+                    "provider": "claude",
+                }
+    except Exception:
+        pass
+    return None
 
 
 def generate_llm_response(
@@ -55,11 +204,8 @@ def generate_llm_response(
 ) -> Dict[str, Any]:
     """
     Generates a strictly grounded response based on university knowledge chunks.
-    Guarantees:
-      - If no relevant context exists or groundedness is zero -> returns standard "Information not found..."
-      - If OpenAI API key is available -> queries LLM with temperature=0.1.
-      - If running local/offline -> applies rule-based grounding synthesizer with section citations.
-      - NEVER falls back to irrelevant text if substantive terms do not match.
+    Dispatches across configurable LLM providers (OpenAI, Ollama, Claude, Local Synthesizer)
+    with automatic fallbacks and strict anti-hallucination verification.
     """
     if not context_chunks:
         return {
@@ -67,6 +213,7 @@ def generate_llm_response(
             "sources": [],
             "grounded": False,
             "groundedness_score": 0.0,
+            "provider": "none",
         }
 
     # Format sources list
@@ -97,53 +244,27 @@ def generate_llm_response(
             "sources": [],
             "grounded": False,
             "groundedness_score": 0.0,
+            "provider": "guardrail_refusal",
         }
 
-    # Check if OpenAI key is provided
-    api_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY", "")
-    if api_key and not api_key.startswith("sk-placeholder"):
-        try:
-            import httpx
-            context_blocks = []
-            for idx, chunk in enumerate(context_chunks, 1):
-                meta = chunk.get("metadata", {})
-                title = meta.get("title", "Document")
-                category = meta.get("category", "General")
-                heading = meta.get("section_heading", "")
-                heading_str = f" - Section: {heading}" if heading else ""
-                text = chunk.get("text", "")
-                context_blocks.append(f"[Source {idx}: {title} ({category}){heading_str}]\n{text}")
+    # Provider Dispatch
+    context_str = _format_context_blocks(context_chunks)
+    provider = getattr(settings, "LLM_PROVIDER", "openai").lower()
 
-            context_str = "\n\n".join(context_blocks)
-            sys_prompt = SYSTEM_PROMPT_TEMPLATE
-            user_prompt = USER_PROMPT_TEMPLATE.format(context=context_str, query=query)
+    if provider == "ollama":
+        res = _call_ollama(query, context_str, conversation_history, sources, groundedness)
+        if res:
+            return res
+    elif provider == "claude":
+        res = _call_claude(query, context_str, conversation_history, sources, groundedness)
+        if res:
+            return res
+    elif provider == "openai":
+        res = _call_openai(query, context_str, conversation_history, sources, groundedness)
+        if res:
+            return res
 
-            headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-            messages = [{"role": "system", "content": sys_prompt}]
-            if conversation_history:
-                for msg in conversation_history[-6:]:
-                    messages.append({"role": msg["role"], "content": msg["content"]})
-            messages.append({"role": "user", "content": user_prompt})
-
-            payload = {
-                "model": settings.LLM_MODEL,
-                "messages": messages,
-                "temperature": 0.1,
-            }
-
-            resp = httpx.post("https://api.openai.com/v1/chat/completions", json=payload, headers=headers, timeout=30.0)
-            if resp.status_code == 200:
-                answer = resp.json()["choices"][0]["message"]["content"]
-                return {
-                    "answer": answer,
-                    "sources": sources,
-                    "grounded": True,
-                    "groundedness_score": groundedness,
-                }
-        except Exception:
-            pass
-
-    # Intelligent Local Synthesis Engine (deterministic, grounded, zero-hallucination)
+    # Intelligent Local Synthesis Engine (deterministic, grounded, zero-hallucination fallback)
     # Filter sentences containing substantive query words
     domain_stopwords = {
         "what", "is", "the", "are", "for", "how", "can", "does", "rule", "policy",
@@ -158,6 +279,7 @@ def generate_llm_response(
         q_words = {w for w in re.findall(r"\b\w+\b", query.lower()) if w not in domain_stopwords}
 
     scored_sentences = []
+    min_required_overlap = 2 if len(q_words) >= 3 else 1
 
     for chunk in context_chunks:
         text = chunk.get("text", "")
@@ -171,7 +293,7 @@ def generate_llm_response(
                 continue
             s_words = set(re.findall(r"\b[\w%]+(?:-[\w%]+)*\b", s_clean.lower()))
             overlap = len(q_words & s_words)
-            if overlap > 0:
+            if overlap >= min_required_overlap:
                 rule_boost = 1.5 if ("%" in s_clean or any(c.isdigit() for c in s_clean) or "must" in s_words or "required" in s_words) else 1.0
                 scored_sentences.append((overlap * rule_boost, s_clean, heading))
 
@@ -182,6 +304,7 @@ def generate_llm_response(
             "sources": [],
             "grounded": False,
             "groundedness_score": 0.0,
+            "provider": "guardrail_refusal",
         }
 
     scored_sentences.sort(key=lambda x: x[0], reverse=True)
@@ -220,4 +343,5 @@ def generate_llm_response(
         "sources": sources,
         "grounded": True,
         "groundedness_score": groundedness,
+        "provider": "local_synthesizer",
     }

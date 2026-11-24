@@ -1,0 +1,112 @@
+{
+  "milestone": "STAGE_G",
+  "version": "1.0.0",
+  "timestamp": "2026-11-18T09:42:00Z",
+  "project": "UniMind AI + AegisOps",
+  "git": {
+    "branch": "main",
+    "head_commit": "ea6d1efc120f15e38d1fd2852a0964d0d62e3c3d",
+    "working_tree_clean": false,
+    "stage_f_security_fixes_intact": true
+  },
+  "runtime_environment": {
+    "os": "Windows 11",
+    "python_version": "3.11.9",
+    "node_version": "v20+",
+    "architecture": "Single-Node Modular Monolith",
+    "deployment_scope_approved": [
+      "Local Modular Monolith",
+      "Development Environment",
+      "Single-Host Staging",
+      "Controlled Pilot Deployment"
+    ],
+    "deployment_scope_excluded": [
+      "Multi-Node Kubernetes Deployment",
+      "PostgreSQL HA Clustering",
+      "Distributed Vector Database",
+      "Distributed Redis State Broker",
+      "S3 Multi-Region Storage"
+    ]
+  },
+  "verification_metrics": {
+    "regression_tests": {
+      "total": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "pass_rate_percent": 100.0,
+      "execution_duration_seconds": 91.82
+    },
+    "security_cross_tenant_probes": {
+      "total": 14,
+      "passed": 14,
+      "failed": 0,
+      "pass_rate_percent": 100.0,
+      "execution_duration_seconds": 56.88
+    },
+    "smoke_checks": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    "frontend_production_build": {
+      "status": "SUCCESS",
+      "build_duration_seconds": 36.57,
+      "errors": 0,
+      "modules_transformed": 1492
+    }
+  },
+  "performance_benchmarks": {
+    "host_total_ram_gb": 7.71,
+    "system_available_ram_gb": 1.25,
+    "system_ram_utilization_percent": 83.8,
+    "peak_process_ram_mb": 550.52,
+    "process_ram_utilization_percent": 6.97,
+    "ram_budget_limit_mb": 750.0,
+    "ram_budget_headroom_mb": 199.48,
+    "warm_rag_latency_ms": 36.98,
+    "anomaly_detection_latency_ms": 29.55,
+    "lru_cache_memory_cap_mb": 25.0,
+    "lru_cache_max_keys": 10000
+  },
+  "data_and_model_integrity": {
+    "isolation_forest_model": {
+      "path": "ml/models/isolation_forest.joblib",
+      "size_bytes": 208610,
+      "sha256": "c2715221415485b2c3956f71625d244d554281a44911f1d49fe8b0c170ff5b20",
+      "status": "VERIFIED_UNMODIFIED"
+    },
+    "sqlite_database": {
+      "path": "backend/unimind.db",
+      "integrity_check": "ok",
+      "foreign_key_check": "ok"
+    },
+    "chroma_vector_store": {
+      "path": "chroma_db/",
+      "primary_collection": "university_knowledge_base",
+      "chunk_count": 8,
+      "status": "VERIFIED_INTACT"
+    }
+  },
+  "critical_file_hashes": {
+    "ml/models/isolation_forest.joblib": "c2715221415485b2c3956f71625d244d554281a44911f1d49fe8b0c170ff5b20",
+    "backend/app/adapters/storage.py": "3bf754f70e9e1cad3280e7469b5d68a64910cf89116bb70f1057668ff2ba74bf",
+    "backend/app/adapters/vector.py": "6af3a5609075492eb38c0844ac2409a7d4238a8ea8f226fa3474b0c268397cb7",
+    "backend/app/adapters/cache.py": "bcbc24d6df7e1ea38e5ec8f2bd5af3860d557ac34decc3f7b797a0a4d4a5ac10",
+    "backend/app/adapters/factory.py": "a695bf7297235e47baaa335ea880b218c037a04f653d6cf0998f5c9141b111db",
+    "backend/app/adapters/exceptions.py": "b987e06eb465252d2e64eabb643a5af843a97cea6fae61e134e24ca843161518",
+    "backend/app/middleware/rate_limit.py": "76d8b0b008790c69e9b38aee4b0c75e89f822fd394e18d0b39d5f3c32bd98fec",
+    "backend/app/services/governance_service.py": "2854c24900668c5a206df4bcf3467218782ab79648ad30da3adfd98c9ac59351",
+    "backend/app/services/metrics_service.py": "4d25df1c60bc5d4f689d592fad6f55289f20aec7d5d2f34407493676e29e1c73",
+    "digital_twin/aegisops_bridge.py": "133874647a99efd2a6729ad2a9263a0af51fa86c1522db8cf613e4eb80822702",
+    "backend/app/api/v1/health.py": "766a2ac6d49d18ce6621d78d8604029ca8eea8fb15b6224e185d55b8b32f64d8",
+    "backend/app/api/v1/governance.py": "16beaa7ff6083937a22b09cbdf83a0eaaf2d93a0788b0cf35232f1cf283b9c04",
+    "backend/app/api/v1/digital_twin.py": "12ecae7d3eb06b215d00e8cd1e5d615fa24960047c967aee24138cbf4dd6ff69"
+  },
+  "acceptance_decision": {
+    "verdict": "ACCEPTED",
+    "date": "2026-11-18",
+    "authorized_by": "System Architect & Master Controller",
+    "next_steps": "Stage G baseline frozen; await user authorization before initiating any Stage H planning."
+  }
+}

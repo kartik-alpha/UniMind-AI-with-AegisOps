@@ -1,0 +1,62 @@
+{
+  "milestone": "Stage F \u2014 Commercial Readiness, Multi-Tenant Hardening & Production Optimization",
+  "status": "ACCEPTED",
+  "acceptance_date": "2026-11-14T16:56:13.640483+00:00",
+  "git_head": "ea6d1efc120f15e38d1fd2852a0964d0d62e3c3d",
+  "approved_scope": [
+    "Local modular monolith",
+    "Development environment",
+    "Single-host staging",
+    "Controlled pilot deployment"
+  ],
+  "unapproved_scope": [
+    "Multi-node Kubernetes deployment",
+    "PostgreSQL HA",
+    "Distributed vector storage",
+    "Redis-based coordination",
+    "S3-compatible object storage"
+  ],
+  "verification_scorecard": {
+    "automated_regression_tests": "56/56 PASS (100%)",
+    "cross_tenant_security_probes": "14/14 PASS (100%)",
+    "application_smoke_test": "8/8 PASS (100%)",
+    "frontend_production_build": "PASS (0 errors, 24.63s)",
+    "sqlite_pragma_integrity": "ok",
+    "isolation_forest_model_features": 5,
+    "peak_process_ram_mb": 516.89
+  },
+  "critical_file_hashes": {
+    "ml/models/isolation_forest.joblib": {
+      "sha256": "c2715221415485b2c3956f71625d244d554281a44911f1d49fe8b0c170ff5b20",
+      "size_bytes": 1116105
+    },
+    "unimind.db": {
+      "sha256": "b2715df552362873a86d9da43ac98230ca1c0cc72921871c5380c8a587631203",
+      "size_bytes": 184320
+    },
+    "run_app.py": {
+      "sha256": "f1a8ec9315be2e4b6f04436c660b3982cd5e2039962f69931780b87a6c9dc47a",
+      "size_bytes": 1845
+    },
+    "backend/app/main.py": {
+      "sha256": "b2dc8e7e8fec61b27e9b0a45884eb4792808575186c50f97c4bace385153888c",
+      "size_bytes": 2346
+    },
+    "backend/app/api/tenant_deps.py": {
+      "sha256": "0db70fc5befb809e9dcd34104cea915f0c74cbec0257aa04ccc8b92a49eb7cea",
+      "size_bytes": 4212
+    },
+    "backend/app/api/v1/agent.py": {
+      "sha256": "d5f4d92d22130204e6a4bf275b30b2799ee56ea976ccc44b6db14e85319c1272",
+      "size_bytes": 1036
+    },
+    "backend/app/services/document_service.py": {
+      "sha256": "3051a5a88729f56e38c747dd5b215fcf37ed59ebac17932c997987893772c9e5",
+      "size_bytes": 3806
+    },
+    "frontend/src/App.jsx": {
+      "sha256": "6199dd224de4d1ae3a775ac8b25e129dbc02de1233dbe3f85ec1af04ae55cae9",
+      "size_bytes": 5082
+    }
+  }
+}

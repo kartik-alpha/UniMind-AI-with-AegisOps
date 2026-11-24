@@ -3,9 +3,9 @@ from fastapi.responses import PlainTextResponse
 from services.common_metrics import ServiceMetrics
 
 app = FastAPI(title="UniMind Exam Service Demo", version="1.0.0")
-metrics = ServiceMetrics(service_name="Exam Service", base_cpu=92.0, base_mem=81.0, base_latency=1800.0, replicas=2)
+metrics = ServiceMetrics(service_name="Exam Service", base_cpu=28.0, base_mem=42.0, base_latency=120.0, replicas=2)
 # Default Exam Service into active degraded mode to match AegisOps screenshot scenario
-metrics.set_chaos(True)
+metrics.set_chaos(True, scenario=ServiceMetrics.SCENARIO_DB_POOL, severity="HIGH")
 
 
 @app.get("/health")

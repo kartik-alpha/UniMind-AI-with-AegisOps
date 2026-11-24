@@ -1,3 +1,10 @@
+from app.models.organization import (
+    Organization,
+    OrganizationMembership,
+    TenantStatus,
+    TenantIndustry,
+    TenantRole,
+)
 from app.models.user import User, UserRole
 from app.models.document import Document
 from app.models.conversation import Conversation, Message
@@ -5,6 +12,11 @@ from app.models.ticket import Ticket, TicketStatus, TicketPriority, Incident, In
 from app.models.audit import AuditLog
 
 __all__ = [
+    "Organization",
+    "OrganizationMembership",
+    "TenantStatus",
+    "TenantIndustry",
+    "TenantRole",
     "User",
     "UserRole",
     "Document",

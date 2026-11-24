@@ -17,6 +17,11 @@ import IncidentsView from './components/IncidentsView';
 import AIDiagnosisView from './components/AIDiagnosisView';
 import RemediationView from './components/RemediationView';
 import KubernetesView from './components/KubernetesView';
+import ChaosSimulationView from './components/ChaosSimulationView';
+import DigitalTwinView from './components/DigitalTwinView';
+import TenantGovernanceView from './components/TenantGovernanceView';
+import ObservabilityView from './components/ObservabilityView';
+import { apiFetch } from './apiClient';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -25,28 +30,37 @@ export default function App() {
   const [servicesData, setServicesData] = useState(null);
   const [metricsData, setMetricsData] = useState(null);
   const [logsData, setLogsData] = useState(null);
+  const [error, setError] = useState(null);
 
   // Fetch backend API state
   const fetchData = async () => {
     try {
       const [anomRes, svcRes, metRes, logRes] = await Promise.all([
-        fetch('/api/v1/ml/anomaly-scores'),
-        fetch('/api/v1/aegisops/services'),
-        fetch('/api/v1/aegisops/metrics'),
-        fetch('/api/v1/aegisops/logs'),
+        apiFetch('/api/v1/ml/anomaly-scores'),
+        apiFetch('/api/v1/aegisops/services'),
+        apiFetch('/api/v1/aegisops/metrics'),
+        apiFetch('/api/v1/aegisops/logs'),
       ]);
 
       if (anomRes.ok) setAnomalyData(await anomRes.json());
       if (svcRes.ok) setServicesData(await svcRes.json());
       if (metRes.ok) setMetricsData(await metRes.json());
       if (logRes.ok) setLogsData(await logRes.json());
+      setError(null);
     } catch (e) {
-      // Offline fallback state matching screenshots
+      setError('Unable to reach backend services. Displaying cached data.');
     }
   };
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 15000);
+    const handleTenantChange = () => fetchData();
+    window.addEventListener('unimind:tenant_change', handleTenantChange);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('unimind:tenant_change', handleTenantChange);
+    };
   }, []);
 
   const handleRunDemo = () => {
@@ -60,7 +74,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-[#0B0F19] font-sans text-slate-200">
       {/* Left Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onRunDemo={handleRunDemo} />
 
@@ -68,7 +82,14 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <Header activeTab={activeTab} activeIncidentCount={1} />
 
-        <main className="flex-1 p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm">
+              {error}
+            </div>
+          )}
+
           {/* UniMind AI Suite */}
           {activeTab === 'dashboard' && (
             <DashboardView
@@ -93,6 +114,12 @@ export default function App() {
           {activeTab === 'aegis_overview' && (
             <AegisOverviewView onNavigate={(tab) => setActiveTab(tab)} />
           )}
+          {activeTab === 'digital_twin' && (
+            <DigitalTwinView onNavigate={(tab) => setActiveTab(tab)} />
+          )}
+          {activeTab === 'chaos' && (
+            <ChaosSimulationView onNavigate={(tab) => setActiveTab(tab)} />
+          )}
           {activeTab === 'services' && (
             <ServicesView
               services={servicesData}
@@ -113,6 +140,8 @@ export default function App() {
             <RemediationView onNavigate={(tab) => setActiveTab(tab)} />
           )}
           {activeTab === 'kubernetes' && <KubernetesView />}
+          {activeTab === 'governance' && <TenantGovernanceView />}
+          {activeTab === 'observability' && <ObservabilityView />}
         </main>
       </div>
     </div>

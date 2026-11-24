@@ -11,18 +11,18 @@ export default function MetricsView({ metrics }) {
   const rows = metrics || defaultMetrics;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Page Header */}
       <div>
-        <span className="text-xs font-bold tracking-wider text-slate-500 uppercase block">PROMETHEUS</span>
-        <h2 className="text-2xl font-bold text-slate-900 mt-0.5">Metrics</h2>
-        <p className="text-xs text-slate-500 mt-1">Five features per service feed the anomaly model.</p>
+        <span className="text-xs font-bold tracking-wider text-slate-400 uppercase block">PROMETHEUS</span>
+        <h2 className="text-2xl font-bold text-slate-100 mt-0.5">Metrics</h2>
+        <p className="text-xs text-slate-400 mt-1">Five features per service feed the anomaly model.</p>
       </div>
 
       {/* Metrics Table Card */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
+          <thead className="bg-slate-900/80 border-b border-slate-700/60 text-slate-400 font-extrabold uppercase tracking-wider">
             <tr>
               <th className="py-3.5 px-6">SERVICE</th>
               <th className="py-3.5 px-6">CPU</th>
@@ -33,15 +33,15 @@ export default function MetricsView({ metrics }) {
               <th className="py-3.5 px-6">REPLICAS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+          <tbody className="divide-y divide-slate-700/50 font-medium text-slate-300">
             {rows.map((row) => (
-              <tr key={row.service} className="hover:bg-slate-50/80 transition-colors">
-                <td className="py-4 px-6 font-bold text-slate-900">{row.service}</td>
-                <td className={`py-4 px-6 ${row.is_alert ? 'text-red-600 font-bold' : ''}`}>{row.cpu}</td>
+              <tr key={row.service} className="hover:bg-slate-700/30 transition-colors">
+                <td className="py-4 px-6 font-bold text-slate-100">{row.service}</td>
+                <td className={`py-4 px-6 ${row.is_alert ? 'text-rose-400 font-bold' : ''}`}>{row.cpu}</td>
                 <td className="py-4 px-6">{row.memory}</td>
                 <td className="py-4 px-6">{row.requests}</td>
-                <td className={`py-4 px-6 ${row.is_alert ? 'text-red-600 font-bold' : ''}`}>{row.latency}</td>
-                <td className={`py-4 px-6 ${row.is_alert ? 'text-red-600 font-bold' : ''}`}>{row.errors}</td>
+                <td className={`py-4 px-6 ${row.is_alert ? 'text-rose-400 font-bold' : ''}`}>{row.latency}</td>
+                <td className={`py-4 px-6 ${row.is_alert ? 'text-rose-400 font-bold' : ''}`}>{row.errors}</td>
                 <td className="py-4 px-6">{row.replicas}</td>
               </tr>
             ))}

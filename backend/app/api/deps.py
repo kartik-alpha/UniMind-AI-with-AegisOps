@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.schemas.token import TokenPayload
@@ -19,9 +20,7 @@ def get_current_user(
 ) -> User:
     if token:
         try:
-            payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-            )
+            payload = decode_access_token(token)
             token_data = TokenPayload(**payload)
             sub = token_data.sub
             if sub and sub.isdigit():
@@ -40,6 +39,15 @@ def get_current_user(
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+    # Enterprise Zero-Trust Enforcement: Block unauthenticated access in production/strict mode
+    strict_auth = getattr(settings, "AUTH_ENFORCE_STRICT", False) or getattr(settings, "ENVIRONMENT", "").lower() in ("production", "staging")
+    if strict_auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication credentials required. Please provide a valid Bearer token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     # Seamless development / demo mode fallback: return or create default active admin user
     demo_user = db.query(User).filter(User.role == UserRole.ADMIN).first()

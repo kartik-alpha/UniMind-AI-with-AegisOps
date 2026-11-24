@@ -11,11 +11,13 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String(100), unique=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    tenant_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     title = Column(String(255), default="University Query")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="conversations")
+    organization = relationship("Organization", back_populates="conversations")
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
 
 

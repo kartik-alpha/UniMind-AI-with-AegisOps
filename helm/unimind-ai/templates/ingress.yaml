@@ -1,0 +1,55 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "unimind.fullname" . }}-ingress
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "unimind.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className | default "nginx" | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    {{- if .Values.ingress.tls.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.tls.clusterIssuer | quote }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ include "unimind.fullname" . }}-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "unimind.fullname" . }}-backend
+                port:
+                  number: 8000
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "unimind.fullname" . }}-backend
+                port:
+                  number: 8000
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "unimind.fullname" . }}-backend
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "unimind.fullname" . }}-frontend
+                port:
+                  number: 80
+{{- end }}

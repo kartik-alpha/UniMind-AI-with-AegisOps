@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "unimind.fullname" . }}-backend
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app.kubernetes.io/component: backend
+    {{- include "unimind.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/name: {{ include "unimind.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/name: {{ include "unimind.name" . }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "unimind.fullname" . }}-config
+            - secretRef:
+                name: {{ include "unimind.fullname" . }}-secrets
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ include "unimind.fullname" . }}-data-pvc

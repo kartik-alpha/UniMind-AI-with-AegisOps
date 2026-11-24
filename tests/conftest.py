@@ -32,6 +32,32 @@ def db_session():
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
 
+    # Ensure default organization exists for this test session
+    from app.models.organization import Organization, TenantStatus, TenantIndustry
+    if not session.query(Organization).filter(Organization.id == 1).first():
+        default_org = Organization(
+            id=1,
+            slug="unimind-edu",
+            name="UniMind University",
+            industry=TenantIndustry.EDUCATION,
+            status=TenantStatus.ACTIVE,
+            config={
+                "display_name": "UniMind University",
+                "categories": [
+                    "attendance",
+                    "examinations",
+                    "hostel",
+                    "library",
+                    "academics",
+                    "policies",
+                    "student_guidelines",
+                    "notices",
+                ],
+            },
+        )
+        session.add(default_org)
+        session.flush()
+
     yield session
 
     session.close()

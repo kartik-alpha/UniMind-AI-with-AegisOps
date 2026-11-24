@@ -14,6 +14,11 @@ class DocumentCreate(DocumentBase):
     pass
 
 
+class DocumentWorkflowRequest(BaseModel):
+    approval_status: str
+    notes: Optional[str] = None
+
+
 class DocumentResponse(DocumentBase):
     id: int
     filename: str
@@ -22,6 +27,7 @@ class DocumentResponse(DocumentBase):
     mime_type: str
     chunk_count: int
     uploader_id: Optional[int] = None
+    tenant_id: Optional[int] = 1
     created_at: datetime
     updated_at: datetime
 

@@ -175,12 +175,13 @@ class BM25Index:
         return results
 
 
-_bm25_instance = None
+_bm25_instances: Dict[int, BM25Index] = {}
 
 
-def get_bm25_index() -> BM25Index:
-    global _bm25_instance
-    if _bm25_instance is None:
-        _bm25_instance = BM25Index()
-    return _bm25_instance
+def get_bm25_index(tenant_id: int = 1) -> BM25Index:
+    """Returns the dedicated BM25 lexical index for the specified tenant."""
+    global _bm25_instances
+    if tenant_id not in _bm25_instances:
+        _bm25_instances[tenant_id] = BM25Index()
+    return _bm25_instances[tenant_id]
 

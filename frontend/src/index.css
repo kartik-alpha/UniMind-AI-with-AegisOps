@@ -12,25 +12,25 @@
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #0B0F19;
+  color: #E2E8F0;
   min-height: 100vh;
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbars — Dark Theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #1E293B;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #475569;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 /* Sidebar Navy Theme */
@@ -38,44 +38,59 @@ body {
   background-color: #0b132b;
 }
 .sidebar-item-active {
-  background-color: #1c2541;
-  color: #ffffff;
-  border-left: 3px solid #3b82f6;
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #67e8f9;
+  border-left: 2px solid #22d3ee;
 }
 
-/* Card Styles */
+/* Card Styles — Dark Enterprise */
 .ui-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 }
 
 .badge-degraded {
-  background-color: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fcd34d;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .badge-critical {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background-color: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.2);
 }
 
 .badge-healthy {
-  background-color: #dcfce7;
-  color: #15803d;
-  border: 1px solid #86efac;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-/* Button animation */
+/* Button animation — Dark Enterprise */
 .btn-primary {
-  background-color: #2563eb;
+  background-color: #0891b2;
   color: #ffffff;
   transition: all 0.2s ease;
 }
 .btn-primary:hover {
-  background-color: #1d4ed8;
+  background-color: #06b6d4;
   transform: translateY(-1px);
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
 }

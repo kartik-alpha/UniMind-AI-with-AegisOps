@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "unimind.fullname" . }}-config
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "unimind.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.global.env | quote }}
+  LOG_LEVEL: {{ .Values.global.logLevel | quote }}
+  DATABASE_BACKEND: {{ .Values.backends.database | quote }}
+  VECTOR_BACKEND: {{ .Values.backends.vector | quote }}
+  CACHE_BACKEND: {{ .Values.backends.cache | quote }}
+  STORAGE_BACKEND: {{ .Values.backends.storage | quote }}
+  DATABASE_URL: {{ .Values.config.databaseUrl | quote }}
+  QDRANT_HOST: {{ .Values.config.qdrantHost | quote }}
+  QDRANT_PORT: {{ .Values.config.qdrantPort | quote }}
+  REDIS_URL: {{ .Values.config.redisUrl | quote }}
+  S3_ENDPOINT_URL: {{ .Values.config.s3EndpointUrl | quote }}
+  S3_BUCKET_NAME: {{ .Values.config.s3BucketName | quote }}
+  S3_REGION_NAME: {{ .Values.config.s3RegionName | quote }}

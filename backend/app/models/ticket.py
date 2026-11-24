@@ -46,11 +46,13 @@ class Ticket(Base):
     priority = Column(Enum(TicketPriority), default=TicketPriority.MEDIUM, nullable=False)
     category = Column(String(100), default="IT Support")
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    tenant_id = Column(Integer, ForeignKey("organizations.id"), default=1, nullable=True, index=True)
     assigned_to = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     created_by = relationship("User", back_populates="tickets")
+    organization = relationship("Organization", back_populates="tickets")
 
 
 class Incident(Base):
@@ -59,6 +61,7 @@ class Incident(Base):
     id = Column(Integer, primary_key=True, index=True)
     incident_code = Column(String(50), unique=True, index=True, nullable=False)
     service_name = Column(String(100), index=True, nullable=False)
+    tenant_id = Column(Integer, ForeignKey("organizations.id"), default=1, nullable=True, index=True)
     title = Column(String(255), nullable=False)
     status = Column(Enum(IncidentStatus), default=IncidentStatus.OPEN, nullable=False)
     severity = Column(Enum(IncidentSeverity), default=IncidentSeverity.MEDIUM, nullable=False)
@@ -71,3 +74,5 @@ class Incident(Base):
     action_taken = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
+
+    organization = relationship("Organization", back_populates="incidents")

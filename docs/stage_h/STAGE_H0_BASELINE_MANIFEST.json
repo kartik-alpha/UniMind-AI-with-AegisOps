@@ -1,0 +1,66 @@
+{
+  "milestone": "STAGE_H0",
+  "audit_timestamp": "2026-11-18T22:42:00Z",
+  "project": "UniMind AI + AegisOps Unified Enterprise Platform",
+  "git": {
+    "branch": "feature/stage-h-hybrid-infrastructure",
+    "base_commit": "ea6d1efc120f15e38d1fd2852a0964d0d62e3c3d",
+    "stage_g_baseline_frozen": true
+  },
+  "host_hardware": {
+    "os": "Windows 11 64-bit x64",
+    "cpu": "Intel Core i5-12450H (8 Cores / 12 Threads)",
+    "ram_total_gb": 7.71,
+    "ram_available_gb": 0.56,
+    "ram_target_peak_gb": 5.50,
+    "gpu": "NVIDIA GeForce GTX 1650 (4 GB VRAM)",
+    "gpu_driver": "552.27",
+    "cuda_version": "12.4",
+    "disk_total_gb": 475.67,
+    "disk_used_gb": 421.32,
+    "disk_free_gb": 54.35,
+    "disk_warning_threshold_gb": 30.0,
+    "disk_stop_threshold_gb": 20.0
+  },
+  "runtime_tooling": {
+    "python": "3.11.9",
+    "node": "v26.3.1",
+    "npm": "11.16.0",
+    "git": "2.55.0.windows.3",
+    "docker_available": false,
+    "wsl2_available": false
+  },
+  "data_and_model_checksums": {
+    "isolation_forest_model": {
+      "path": "ml/models/isolation_forest.joblib",
+      "sha256": "c2715221415485b2c3956f71625d244d554281a44911f1d49fe8b0c170ff5b20",
+      "size_bytes": 1116105,
+      "verified": true
+    },
+    "sqlite_database": {
+      "path": "backend/unimind.db",
+      "integrity_check": "ok",
+      "table_count": 9,
+      "verified": true
+    },
+    "chromadb_vector_store": {
+      "path": "data/chroma_db",
+      "primary_collection": "university_knowledge_base",
+      "primary_chunks": 8,
+      "total_collections": 15,
+      "verified": true
+    }
+  },
+  "baseline_snapshot": {
+    "path": "backups/stage_g_baseline",
+    "size_mb": 5.31,
+    "verified": true
+  },
+  "test_status_prior_to_h": {
+    "pytest_total": 74,
+    "pytest_passed": 74,
+    "pytest_failed": 0,
+    "cross_tenant_security_probes_passed": 14,
+    "frontend_build_clean": true
+  }
+}

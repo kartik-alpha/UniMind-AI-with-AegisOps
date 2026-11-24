@@ -1,0 +1,97 @@
+name: Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, "feature/**" ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-verification:
+    name: Backend Tests, Security & Database Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "backend/requirements.txt"
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: 1. Validate Database Migrations & Schemas
+        run: |
+          PYTHONPATH=backend python scripts/validate_database_migrations.py
+
+      - name: 2. Execute Cross-Tenant Security Probes (18 Probes)
+        run: |
+          PYTHONPATH=backend python scripts/verify_cross_tenant_security.py
+
+      - name: 3. Run Full Pytest Regression Suite
+        run: |
+          PYTHONPATH=backend:.:$PYTHONPATH pytest -q
+
+  frontend-verification:
+    name: Frontend Lint & Production Vite Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "frontend/package*.json"
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Execute Production Vite Build
+        working-directory: frontend
+        run: npm run build
+
+  container-verification:
+    name: Docker Container Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: unimind-ai-backend:test
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: unimind-ai-frontend:test

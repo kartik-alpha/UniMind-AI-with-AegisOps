@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: unimind-postgres
+  namespace: unimind-aegisops
+  labels:
+    app: unimind-postgres
+spec:
+  serviceName: "unimind-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unimind-postgres
+  template:
+    metadata:
+      labels:
+        app: unimind-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "unimind_enterprise"
+            - name: POSTGRES_USER
+              value: "unimind_prod_user"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: unimind-secrets
+                  key: SECRET_KEY
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1536Mi"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unimind-postgres
+  namespace: unimind-aegisops
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: unimind-postgres

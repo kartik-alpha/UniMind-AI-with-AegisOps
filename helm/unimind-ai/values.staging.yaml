@@ -1,0 +1,59 @@
+# Single-Host Staging Overrides
+global:
+  env: staging
+  logLevel: INFO
+
+backends:
+  database: postgres
+  vector: qdrant
+  cache: redis
+  storage: s3
+
+config:
+  databaseUrl: "postgresql://unimind:unimind_staging_pw@postgres-staging:5432/unimind_staging"
+  qdrantHost: "qdrant-staging"
+  qdrantPort: 6333
+  redisUrl: "redis://:redis_staging_pw@redis-staging:6379/0"
+  s3EndpointUrl: "http://minio-staging:9000"
+  s3BucketName: "unimind-staging-docs"
+  s3RegionName: "us-east-1"
+
+backend:
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "650Mi"
+    requests:
+      cpu: "250m"
+      memory: "350Mi"
+
+frontend:
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+ingress:
+  enabled: true
+  host: staging.unimind.internal
+  tls:
+    enabled: true
+    clusterIssuer: staging-ca-issuer
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true

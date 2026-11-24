@@ -1,0 +1,45 @@
+# Local Development Overrides
+global:
+  env: development
+  logLevel: DEBUG
+
+backends:
+  database: sqlite
+  vector: chroma
+  cache: memory
+  storage: local
+
+backend:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "450Mi"
+    requests:
+      cpu: "100m"
+      memory: "250Mi"
+
+frontend:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: "250m"
+      memory: "200Mi"
+    requests:
+      cpu: "50m"
+      memory: "100Mi"
+
+ingress:
+  enabled: true
+  host: localhost
+  tls:
+    enabled: false
+
+hpa:
+  enabled: false
+
+pdb:
+  enabled: false
+
+networkPolicy:
+  enabled: false

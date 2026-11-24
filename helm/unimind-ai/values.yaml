@@ -1,0 +1,91 @@
+global:
+  env: development
+  logLevel: INFO
+
+namespace:
+  name: unimind-ai
+
+backends:
+  database: sqlite
+  vector: chroma
+  cache: memory
+  storage: local
+
+config:
+  databaseUrl: "sqlite:///./unimind.db"
+  qdrantHost: "localhost"
+  qdrantPort: 6333
+  redisUrl: "redis://localhost:6379/0"
+  s3EndpointUrl: "http://localhost:9000"
+  s3BucketName: "unimind-documents"
+  s3RegionName: "us-east-1"
+
+secrets:
+  secretKey: "change-me-in-production-vault"
+  databasePassword: ""
+  qdrantApiKey: ""
+  redisPassword: ""
+  s3AccessKey: ""
+  s3SecretKey: ""
+
+backend:
+  replicaCount: 1
+  image:
+    repository: unimind-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "750Mi"
+    requests:
+      cpu: "250m"
+      memory: "350Mi"
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: unimind-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: unimind.local
+  tls:
+    enabled: false
+    clusterIssuer: letsencrypt-prod
+
+hpa:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+pdb:
+  enabled: false
+  minAvailable: 1
+
+networkPolicy:
+  enabled: false
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  storageClass: ""

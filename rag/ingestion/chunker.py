@@ -1,4 +1,5 @@
 import re
+import hashlib
 from typing import List, Dict, Any, Optional
 
 
@@ -88,10 +89,12 @@ def chunk_text(
             return  # skip trivial fragments
 
         words = chunk_body.split()
+        chunk_hash = hashlib.sha256(chunk_body.encode("utf-8")).hexdigest()[:16]
         chunk_meta = metadata.copy()
         chunk_meta.update({
             "chunk_id": f"{doc_id}_chunk_{chunk_id}",
             "chunk_index": chunk_id,
+            "chunk_hash": chunk_hash,
             "section_heading": heading,
             "word_count": len(words),
             "char_length": len(chunk_body),

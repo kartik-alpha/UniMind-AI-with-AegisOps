@@ -4,19 +4,82 @@ from sqlalchemy.orm import Session
 from app.db.base_class import Base
 from app.db.session import engine, SessionLocal
 from app.core.security import get_password_hash
+from app.models.organization import (
+    Organization,
+    OrganizationMembership,
+    TenantStatus,
+    TenantIndustry,
+    TenantRole,
+)
 from app.models.user import User, UserRole
 from app.models.document import Document
 from app.models.ticket import Ticket, TicketPriority, TicketStatus, Incident, IncidentSeverity, IncidentStatus
 from rag.ingestion.chunker import chunk_text
 from rag.vector_store.chroma_service import get_chroma_store
+from app.db.migrations.manager import apply_migrations
+
+
+def _migrate_sqlite_schema(bind_engine):
+    """Safely adds missing tenant_id column to existing SQLite tables if not present."""
+    from sqlalchemy import text
+    try:
+        with bind_engine.connect() as conn:
+            for table in ["users", "documents", "tickets", "conversations", "incidents", "audit_logs"]:
+                try:
+                    res = conn.execute(text(f"PRAGMA table_info({table})")).fetchall()
+                    cols = [r[1] for r in res]
+                    if cols and "tenant_id" not in cols:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN tenant_id INTEGER DEFAULT 1 REFERENCES organizations(id)"))
+                        conn.commit()
+                except Exception:
+                    pass
+
+            # Ensure audit_logs has cryptographic hash chain columns
+            try:
+                res = conn.execute(text("PRAGMA table_info(audit_logs)")).fetchall()
+                cols = [r[1] for r in res]
+                if cols:
+                    if "previous_hash" not in cols:
+                        conn.execute(text("ALTER TABLE audit_logs ADD COLUMN previous_hash VARCHAR(64)"))
+                    if "current_hash" not in cols:
+                        conn.execute(text("ALTER TABLE audit_logs ADD COLUMN current_hash VARCHAR(64)"))
+                    if "signature" not in cols:
+                        conn.execute(text("ALTER TABLE audit_logs ADD COLUMN signature VARCHAR(128)"))
+                    conn.commit()
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 def seed_initial_data():
     """Seeds default demo users, documents, incident, tickets, and RAG knowledge base."""
     Base.metadata.create_all(bind=engine)
+    apply_migrations(engine)
+    _migrate_sqlite_schema(engine)
     db: Session = SessionLocal()
 
     try:
+        # 0. Seed Default Organization (UniMind University)
+        default_org = db.query(Organization).filter(Organization.slug == "unimind-edu").first()
+        if not default_org:
+            default_org = Organization(
+                slug="unimind-edu",
+                name="UniMind University",
+                industry=TenantIndustry.EDUCATION,
+                status=TenantStatus.ACTIVE,
+                config={
+                    "display_name": "UniMind University",
+                    "categories": ["attendance", "examinations", "hostel", "library", "academics", "policies"],
+                    "primary_color": "#2563eb",
+                    "welcome_message": "Welcome to UniMind AI Institutional Support.",
+                    "ai_instructions": "You are UniMind AI, the official student and faculty academic assistant.",
+                },
+            )
+            db.add(default_org)
+            db.commit()
+            db.refresh(default_org)
+
         # 1. Seed Users
         admin = db.query(User).filter(User.username == "admin").first()
         if not admin:
@@ -26,9 +89,12 @@ def seed_initial_data():
                 full_name="Kartik Lakhera",
                 hashed_password=get_password_hash("admin123"),
                 role=UserRole.ADMIN,
+                tenant_id=default_org.id,
                 is_active=True,
             )
             db.add(admin)
+        elif not admin.tenant_id:
+            admin.tenant_id = default_org.id
 
         student = db.query(User).filter(User.username == "student").first()
         if not student:
@@ -38,15 +104,47 @@ def seed_initial_data():
                 full_name="Alice Student",
                 hashed_password=get_password_hash("student123"),
                 role=UserRole.STUDENT,
+                tenant_id=default_org.id,
                 is_active=True,
             )
             db.add(student)
+        elif not student.tenant_id:
+            student.tenant_id = default_org.id
 
         db.commit()
         if admin:
             db.refresh(admin)
+            admin_mem = db.query(OrganizationMembership).filter(
+                OrganizationMembership.user_id == admin.id,
+                OrganizationMembership.tenant_id == default_org.id
+            ).first()
+            if not admin_mem:
+                db.add(OrganizationMembership(
+                    tenant_id=default_org.id,
+                    user_id=admin.id,
+                    role=TenantRole.TENANT_ADMIN,
+                ))
+
         if student:
             db.refresh(student)
+            stu_mem = db.query(OrganizationMembership).filter(
+                OrganizationMembership.user_id == student.id,
+                OrganizationMembership.tenant_id == default_org.id
+            ).first()
+            if not stu_mem:
+                db.add(OrganizationMembership(
+                    tenant_id=default_org.id,
+                    user_id=student.id,
+                    role=TenantRole.TENANT_MEMBER,
+                ))
+
+        db.commit()
+
+        # Backfill any existing records without tenant_id to default_org
+        db.query(Document).filter(Document.tenant_id == None).update({Document.tenant_id: default_org.id})
+        db.query(Ticket).filter(Ticket.tenant_id == None).update({Ticket.tenant_id: default_org.id})
+        db.query(Incident).filter(Incident.tenant_id == None).update({Incident.tenant_id: default_org.id})
+        db.commit()
 
         # 2. Seed University Documents
         data_docs_dir = Path("./data/documents").resolve()
@@ -117,6 +215,7 @@ def seed_initial_data():
                     filename=d["filename"],
                     file_path=str(doc_path),
                     uploader_id=uploader_id,
+                    tenant_id=default_org.id,
                 )
                 db.add(new_doc)
                 db.commit()
@@ -130,6 +229,7 @@ def seed_initial_data():
                         chunk_overlap=40,
                         metadata={
                             "doc_id": new_doc.id,
+                            "tenant_id": default_org.id,
                             "title": new_doc.title,
                             "category": new_doc.category,
                             "filename": new_doc.filename,
@@ -149,6 +249,7 @@ def seed_initial_data():
             active_inc = Incident(
                 incident_code="INC-2026-0842",
                 service_name="Exam Service",
+                tenant_id=default_org.id,
                 title="Database Connection Pool Exhaustion & Spike in 503 Errors",
                 severity=IncidentSeverity.CRITICAL,
                 status=IncidentStatus.OPEN,
@@ -168,6 +269,7 @@ def seed_initial_data():
             t1 = Ticket(
                 ticket_code="TCK-1001",
                 user_id=student_id,
+                tenant_id=default_org.id,
                 title="Hostel Wi-Fi access point in Block C dropping connections",
                 description="The 5GHz access point on the second floor keeps disconnecting during evening study hours.",
                 category="IT Support",
@@ -177,6 +279,7 @@ def seed_initial_data():
             t2 = Ticket(
                 ticket_code="TCK-1002",
                 user_id=student_id,
+                tenant_id=default_org.id,
                 title="Request for grade verification in CS402 Cloud & AIOps",
                 description="Submitted mid-term assignment on LMS before deadline, request grade audit verification.",
                 category="Academic",
@@ -186,6 +289,7 @@ def seed_initial_data():
             t3 = Ticket(
                 ticket_code="TCK-1003",
                 user_id=student_id,
+                tenant_id=default_org.id,
                 title="Library RFID turnstile card scan error at main entrance",
                 description="RFID card scanner displays read error for newly issued student ID cards.",
                 category="Library",
@@ -194,6 +298,13 @@ def seed_initial_data():
             )
             db.add_all([t1, t2, t3])
             db.commit()
+
+        # Backfill and cryptographically chain any pending audit logs
+        try:
+            from app.services.governance_service import GovernanceService
+            GovernanceService.backfill_hash_chain(db)
+        except Exception:
+            pass
 
         print("[UniMind AI] Seeded default database state: users, documents, incident & tickets verified.")
 

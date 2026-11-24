@@ -59,12 +59,12 @@ export default function ServicesView({ services, onSelectService }) {
   const serviceList = services || defaultServices;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Page Header */}
       <div>
-        <span className="text-xs font-bold tracking-wider text-slate-500 uppercase block">AEGISOPS</span>
-        <h2 className="text-2xl font-bold text-slate-900 mt-0.5">Services</h2>
-        <p className="text-xs text-slate-500 mt-1">Click a service to open detailed monitoring.</p>
+        <span className="text-xs font-bold tracking-wider text-slate-400 uppercase block">AEGISOPS</span>
+        <h2 className="text-2xl font-bold text-slate-100 mt-0.5">Services</h2>
+        <p className="text-xs text-slate-400 mt-1">Click a service to open detailed monitoring.</p>
       </div>
 
       {/* Services Grid (4 Cards) */}
@@ -75,22 +75,24 @@ export default function ServicesView({ services, onSelectService }) {
             <div
               key={service.name}
               onClick={() => onSelectService && onSelectService(service.name)}
-              className={`bg-white rounded-xl p-5 border transition-all cursor-pointer shadow-sm hover:shadow-md ${
-                isCritical ? 'border-red-300 ring-1 ring-red-200' : 'border-slate-200'
+              className={`rounded-xl p-5 border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                isCritical
+                  ? 'bg-rose-950/20 border-rose-500/40 ring-1 ring-rose-500/20 hover:border-rose-500/60'
+                  : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600'
               }`}
             >
               {/* Card Header: Service Name + Status Badge */}
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-800 text-base">{service.name}</h3>
+                <h3 className="font-bold text-slate-100 text-base">{service.name}</h3>
                 <span
                   className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                     isCritical
-                      ? 'bg-red-50 text-red-600 border-red-200'
-                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`}
+                    className={`h-1.5 w-1.5 rounded-full ${isCritical ? 'bg-rose-400 animate-ping' : 'bg-emerald-400'}`}
                   ></span>
                   {service.status}
                 </span>
@@ -99,23 +101,23 @@ export default function ServicesView({ services, onSelectService }) {
               {/* Metrics Grid */}
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">CPU</span>
-                  <span className={`font-semibold ${isCritical ? 'text-red-600 font-bold' : 'text-slate-800'}`}>
+                  <span className="text-slate-400">CPU</span>
+                  <span className={`font-semibold ${isCritical ? 'text-rose-400 font-bold' : 'text-slate-200'}`}>
                     {service.cpu}
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-700/60 h-1.5 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${isCritical ? 'bg-red-500' : 'bg-emerald-500'}`}
+                    className={`h-full rounded-full ${isCritical ? 'bg-rose-500' : 'bg-emerald-500'}`}
                     style={{ width: service.cpu }}
                   ></div>
                 </div>
 
                 <div className="flex justify-between items-center pt-1">
-                  <span className="text-slate-500">Memory</span>
-                  <span className="font-semibold text-slate-800">{service.memory}</span>
+                  <span className="text-slate-400">Memory</span>
+                  <span className="font-semibold text-slate-200">{service.memory}</span>
                 </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-700/60 h-1.5 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${isCritical ? 'bg-amber-500' : 'bg-emerald-500'}`}
                     style={{ width: service.memory }}
@@ -123,44 +125,44 @@ export default function ServicesView({ services, onSelectService }) {
                 </div>
 
                 <div className="flex justify-between items-center pt-1">
-                  <span className="text-slate-500">Latency</span>
-                  <span className={`font-semibold ${isCritical ? 'text-red-600 font-bold' : 'text-slate-800'}`}>
+                  <span className="text-slate-400">Latency</span>
+                  <span className={`font-semibold ${isCritical ? 'text-rose-400 font-bold' : 'text-slate-200'}`}>
                     {service.latency}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Uptime</span>
-                  <span className="font-semibold text-slate-800">{service.uptime}</span>
+                  <span className="text-slate-400">Uptime</span>
+                  <span className="font-semibold text-slate-200">{service.uptime}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Request rate</span>
-                  <span className="font-semibold text-slate-800">{service.request_rate}</span>
+                  <span className="text-slate-400">Request rate</span>
+                  <span className="font-semibold text-slate-200">{service.request_rate}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Error rate</span>
-                  <span className={`font-semibold ${isCritical ? 'text-red-600 font-bold' : 'text-slate-800'}`}>
+                  <span className="text-slate-400">Error rate</span>
+                  <span className={`font-semibold ${isCritical ? 'text-rose-400 font-bold' : 'text-slate-200'}`}>
                     {service.error_rate}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Replicas</span>
-                  <span className="font-semibold text-slate-800">{service.replicas}</span>
+                  <span className="text-slate-400">Replicas</span>
+                  <span className="font-semibold text-slate-200">{service.replicas}</span>
                 </div>
 
-                <div className="flex justify-between items-center pt-1 border-t border-slate-100">
-                  <span className="text-slate-500">Last incident</span>
-                  <span className={`font-medium ${isCritical ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-700/50">
+                  <span className="text-slate-400">Last incident</span>
+                  <span className={`font-medium ${isCritical ? 'text-rose-400 font-bold' : 'text-slate-300'}`}>
                     {service.last_incident}
                   </span>
                 </div>
               </div>
 
               {/* Mini Sparkline Chart SVG at bottom */}
-              <div className="mt-4 pt-2 border-t border-slate-100">
+              <div className="mt-4 pt-2 border-t border-slate-700/50">
                 <svg className="w-full h-8 overflow-visible" viewBox="0 0 100 20">
                   <path
                     d={
@@ -169,7 +171,7 @@ export default function ServicesView({ services, onSelectService }) {
                         : 'M 0,12 Q 25,10 50,11 T 75,10 T 100,11'
                     }
                     fill="none"
-                    stroke={isCritical ? '#ef4444' : '#10b981'}
+                    stroke={isCritical ? '#f43f5e' : '#10b981'}
                     strokeWidth="2"
                   />
                 </svg>

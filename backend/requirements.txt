@@ -1,14 +1,32 @@
-fastapi>=0.110.0
-uvicorn[standard]>=0.28.0
-pydantic>=2.6.0
-pydantic-settings>=2.2.0
-sqlalchemy>=2.0.28
-psycopg2-binary>=2.9.9
-pyjwt>=2.8.0
+# Core Web & API Framework
+fastapi>=0.110.0,<=0.142.2
+uvicorn[standard]>=0.28.0,<=0.54.0
+pydantic>=2.6.0,<=2.13.5
+pydantic-settings>=2.2.0,<=2.15.0
+python-multipart>=0.0.9,<=0.0.32
+httpx>=0.27.0,<=0.28.1
+requests>=2.31.0,<=2.34.2
+
+# Persistence & Database
+sqlalchemy>=2.0.28,<=2.1.3
+psycopg2-binary>=2.9.9,<=2.9.13
+
+# Security & Authentication
+pyjwt>=2.8.0,<=2.15.1
 passlib[bcrypt]>=1.7.4
-python-multipart>=0.0.9
-scikit-learn>=1.4.0
-numpy>=1.26.0
-pandas>=2.2.0
-httpx>=0.27.0
-pytest>=8.0.0
+bcrypt>=4.0.0,<=5.0.0
+python-dotenv>=1.0.0,<=1.2.4
+
+# AI, Vector Store & Retrieval (UniMind AI)
+chromadb>=0.4.24,<=1.5.9
+sentence-transformers>=2.7.0,<=6.1.0
+pypdf>=4.2.0,<=6.19.0
+
+# Machine Learning & Observability (AegisOps)
+scikit-learn>=1.4.0,<=1.9.1
+numpy>=1.26.0,<=2.4.6
+pandas>=2.2.0,<=3.0.6
+joblib>=1.3.0,<=1.6.0
+
+# Testing & Quality Assurance
+pytest>=8.0.0,<=9.1.1

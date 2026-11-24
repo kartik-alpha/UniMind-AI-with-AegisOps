@@ -14,6 +14,19 @@ class TicketCreate(TicketBase):
     pass
 
 
+class TicketTriageRequest(BaseModel):
+    title: str
+    description: str
+
+
+class TicketTriageResponse(BaseModel):
+    priority: str
+    category: str
+    recommended_department: str
+    urgency_score: float
+    auto_triaged: bool
+
+
 class TicketUpdate(BaseModel):
     status: Optional[str] = None
     priority: Optional[str] = None
@@ -23,7 +36,7 @@ class TicketUpdate(BaseModel):
 class TicketResponse(TicketBase):
     id: int
     ticket_code: str
-    user_id: int
+    user_id: Optional[int] = None
     status: str
     assigned_to: Optional[str] = None
     created_at: datetime

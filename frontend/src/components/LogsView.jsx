@@ -29,19 +29,19 @@ export default function LogsView({ logs }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Page Header */}
       <div>
-        <span className="text-xs font-bold tracking-wider text-slate-500 uppercase block">AEGISOPS</span>
-        <h2 className="text-2xl font-bold text-slate-900 mt-0.5">Loki — Centralized Logs</h2>
+        <span className="text-xs font-bold tracking-wider text-slate-400 uppercase block">AEGISOPS</span>
+        <h2 className="text-2xl font-bold text-slate-100 mt-0.5">Loki — Centralized Logs</h2>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-4 items-center">
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 shadow-sm flex flex-wrap gap-4 items-center">
         <select
           value={serviceFilter}
           onChange={(e) => setServiceFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           <option>All services</option>
           <option>exam-service</option>
@@ -53,7 +53,7 @@ export default function LogsView({ logs }) {
         <select
           value={levelFilter}
           onChange={(e) => setLevelFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           <option>All levels</option>
           <option>ERROR</option>
@@ -62,25 +62,25 @@ export default function LogsView({ logs }) {
           <option>DEBUG</option>
         </select>
 
-        <select className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500">
           <option>Last 15 min</option>
           <option>Last 1 hour</option>
           <option>Last 24 hours</option>
         </select>
 
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
           <input
             type="text"
             placeholder="Search messages..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
         </div>
       </div>
 
-      {/* Dark Theme Loki Log Table (Matching Screenshot 5) */}
+      {/* Dark Theme Loki Log Table */}
       <div className="bg-[#0b132b] rounded-xl overflow-hidden shadow-lg border border-slate-800">
         <table className="w-full text-left font-mono text-xs text-slate-300">
           <thead className="bg-[#080d1e] text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider">
@@ -101,18 +101,18 @@ export default function LogsView({ logs }) {
                 <tr
                   key={idx}
                   className={`hover:bg-slate-800/40 transition-colors ${
-                    isError ? 'bg-red-950/20' : ''
+                    isError ? 'bg-rose-950/20' : ''
                   }`}
                 >
                   <td className="py-2.5 px-4 text-slate-400 whitespace-nowrap">{log.timestamp}</td>
                   <td className="py-2.5 px-4 text-slate-200 font-semibold">{log.service}</td>
                   <td className="py-2.5 px-4">
-                    {isError && <span className="text-red-500 font-extrabold">ERROR</span>}
+                    {isError && <span className="text-rose-400 font-extrabold">ERROR</span>}
                     {isWarn && <span className="text-amber-400 font-extrabold">WARN</span>}
                     {isInfo && <span className="text-cyan-400 font-extrabold">INFO</span>}
                     {!isError && !isWarn && !isInfo && <span className="text-slate-400 font-bold">{log.level}</span>}
                   </td>
-                  <td className={`py-2.5 px-4 ${isError ? 'text-red-300' : 'text-slate-200'}`}>
+                  <td className={`py-2.5 px-4 ${isError ? 'text-rose-300' : 'text-slate-200'}`}>
                     {log.message}
                   </td>
                   <td className="py-2.5 px-4 text-slate-500 font-mono">{log.trace_id}</td>

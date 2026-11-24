@@ -17,7 +17,9 @@ class Document(Base):
     chunk_count = Column(Integer, default=0)
     meta_info = Column(JSON, default=dict)
     uploader_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    tenant_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     uploader = relationship("User", back_populates="documents")
+    organization = relationship("Organization", back_populates="documents")
