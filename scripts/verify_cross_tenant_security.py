@@ -71,6 +71,12 @@ class SecurityVerificationRunner:
 
     def setup_tenants_and_users(self):
         print("\n--- Setting up Independent Verification Tenants ---")
+        # Ensure default organization and schema
+        default_org = self.db.query(Organization).filter(Organization.id == 1).first()
+        if not default_org:
+            from app.db.seed_data import seed_initial_data
+            seed_initial_data()
+
         # Ensure platform admin
         admin = self.db.query(User).filter(User.username == "admin").first()
         if not admin:

@@ -34,11 +34,11 @@ jobs:
 
       - name: 1. Validate Database Migrations & Schemas
         run: |
-          PYTHONPATH=backend python scripts/validate_database_migrations.py
+          PYTHONPATH=backend:.:$PYTHONPATH python scripts/validate_database_migrations.py
 
       - name: 2. Execute Cross-Tenant Security Probes (18 Probes)
         run: |
-          PYTHONPATH=backend python scripts/verify_cross_tenant_security.py
+          PYTHONPATH=backend:.:$PYTHONPATH python scripts/verify_cross_tenant_security.py
 
       - name: 3. Run Full Pytest Regression Suite
         run: |
