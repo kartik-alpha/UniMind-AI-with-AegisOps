@@ -16,6 +16,7 @@ pyjwt>=2.8.0,<=2.15.1
 passlib[bcrypt]>=1.7.4
 bcrypt>=4.0.0,<=5.0.0
 python-dotenv>=1.0.0,<=1.2.4
+email-validator>=2.0.0,<=2.3.0
 
 # AI, Vector Store & Retrieval (UniMind AI)
 chromadb>=0.4.24,<=1.5.9
